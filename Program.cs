@@ -4,26 +4,19 @@ using OHCP_BK.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Cấu hình Kestrel chạy HTTP trên port 10000
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenLocalhost(7267, listenOptions =>
-    {
-        listenOptions.UseHttps();
-    });
+    options.ListenAnyIP(10000); // HTTP, port 10000 cho Render
 });
 
-builder.Configuration.GetConnectionString("DefaultConnection");
-
-
 // Xây dựng chuỗi kết nối từ biến môi trường
-var dbServer = Environment.GetEnvironmentVariable("DB_SERVER") ?? ".";
-var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "OHCP_DB";
-var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "sa";
-var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "123456";
-var connectionString = $"Server={dbServer};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;MultipleActiveResultSets=true";
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Đăng ký DbContext với PostgreSQL (thay vì SQL Server)
 builder.Services.AddDbContext<OHCPContext>(options =>
-    options.UseSqlServer(connectionString)
-);
+    options.UseNpgsql(connectionString)); // Sử dụng Npgsql cho PostgreSQL
 
 // Đăng ký dịch vụ Authorization
 builder.Services.AddAuthorization();
