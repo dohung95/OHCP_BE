@@ -16,7 +16,7 @@ var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__De
 
 // Đăng ký DbContext với PostgreSQL (thay vì SQL Server)
 builder.Services.AddDbContext<OHCPContext>(options =>
-    options.UseNpgsql(connectionString)); // Sử dụng Npgsql cho PostgreSQL
+    options.UseSqlServer(connectionString)); // Sử dụng Npgsql cho PostgreSQL
 
 // Đăng ký dịch vụ Authorization
 builder.Services.AddAuthorization();
