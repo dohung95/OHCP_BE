@@ -12,21 +12,8 @@ builder.WebHost.ConfigureKestrel(options =>
     });
 });
 
-// Đọc file .env thủ công
-var envFile = Path.Combine(AppContext.BaseDirectory, ".env");
-if (File.Exists(envFile))
-{
-    var lines = File.ReadAllLines(envFile);
-    foreach (var line in lines)
-    {
-        if (string.IsNullOrEmpty(line) || line.StartsWith("#")) continue;
-        var parts = line.Split('=', 2, StringSplitOptions.TrimEntries);
-        if (parts.Length == 2)
-        {
-            Environment.SetEnvironmentVariable(parts[0].Trim(), parts[1].Trim());
-        }
-    }
-}
+builder.Configuration.GetConnectionString("DefaultConnection");
+
 
 // Xây dựng chuỗi kết nối từ biến môi trường
 var dbServer = Environment.GetEnvironmentVariable("DB_SERVER") ?? ".";
@@ -42,13 +29,11 @@ builder.Services.AddDbContext<OHCPContext>(options =>
 builder.Services.AddAuthorization();
 
 // Cấu hình CORS
-var corsAllowedOrigins = Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")?.Split(';', StringSplitOptions.RemoveEmptyEntries) // Sửa: dùng ; thay vì ,
-    .Select(o => o.Trim()).ToArray() ?? ["http://localhost:63527"]; // Sửa: dùng 63527 thay 5173
 builder.Services.AddCors(c =>
 {
     c.AddPolicy("AllowReactApp", p =>
     {
-        p.WithOrigins(corsAllowedOrigins)
+        p.WithOrigins("https://ohcp.onrender.com")
          .AllowAnyHeader()
          .AllowAnyMethod()
          .AllowCredentials();
